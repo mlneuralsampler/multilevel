@@ -1,0 +1,511 @@
+Device cuda NVIDIA A100-SXM-64GB x4
+Lf 64 beta 0.44
+nblocks 5
+batch size [10000, 10000, 10000, 5024, 512, 96, 16]
+lr [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+
+ ==  Epoch 100 metrics ==
+	loss -0.285424
+	varF -3.59971
+	var_varF 1.64524
+	betaF -4.37999
+	ESS 0.514599
+21.346348524093628
+ ==  Epoch 200 metrics ==
+	loss -0.00983536
+	varF -4.36611
+	var_varF 0.0185107
+	betaF -4.37747
+	ESS 0.960658
+22.696319818496704
+ ==  Epoch 300 metrics ==
+	loss -0.0100991
+	varF -4.37253
+	var_varF 0.00839627
+	betaF -4.37706
+	ESS 0.989232
+24.04358744621277
+ ==  Epoch 400 metrics ==
+	loss -0.00621732
+	varF -4.37561
+	var_varF 0.00322633
+	betaF -4.37735
+	ESS 0.99566
+25.40710711479187
+ ==  Epoch 500 metrics ==
+	loss -0.00240582
+	varF -4.37688
+	var_varF 0.000846466
+	betaF -4.37743
+	ESS 0.99778
+26.759897470474243
+Time taken for this level now26.763802528381348
+Unfreezing and training up to level 1
+
+ ==  Epoch 100 metrics ==
+	loss -0.653473
+	varF -14.3999
+	var_varF 2.06575
+	betaF -15.5043
+	ESS 0.572563
+32.60478448867798
+ ==  Epoch 200 metrics ==
+	loss -0.0928623
+	varF -15.485
+	var_varF 0.0388856
+	betaF -15.505
+	ESS 0.952498
+38.03490591049194
+ ==  Epoch 300 metrics ==
+	loss -0.0552064
+	varF -15.4925
+	var_varF 0.0245284
+	betaF -15.5049
+	ESS 0.973101
+43.475067138671875
+ ==  Epoch 400 metrics ==
+	loss -0.0348418
+	varF -15.4963
+	var_varF 0.0169747
+	betaF -15.5048
+	ESS 0.982439
+48.97531461715698
+ ==  Epoch 500 metrics ==
+	loss -0.0233724
+	varF -15.4983
+	var_varF 0.0123666
+	betaF -15.5045
+	ESS 0.987313
+54.43980598449707
+Time taken for this level now27.676130056381226
+Unfreezing and training up to level 2
+
+ ==  Epoch 100 metrics ==
+	loss -0.451948
+	varF -59.8381
+	var_varF 0.413702
+	betaF -60.0826
+	ESS 0.619643
+72.48721814155579
+ ==  Epoch 200 metrics ==
+	loss -0.149223
+	varF -60.0454
+	var_varF 0.0617524
+	betaF -60.0759
+	ESS 0.938324
+90.39598226547241
+ ==  Epoch 300 metrics ==
+	loss -0.0829964
+	varF -60.0553
+	var_varF 0.0420158
+	betaF -60.0763
+	ESS 0.956001
+108.46037125587463
+ ==  Epoch 400 metrics ==
+	loss -0.0553968
+	varF -60.0599
+	var_varF 0.032603
+	betaF -60.0764
+	ESS 0.965167
+126.50333905220032
+ ==  Epoch 500 metrics ==
+	loss -0.0453012
+	varF -60.0628
+	var_varF 0.0265984
+	betaF -60.0762
+	ESS 0.971873
+144.6075496673584
+ ==  Epoch 600 metrics ==
+	loss -0.0383001
+	varF -60.0649
+	var_varF 0.0220008
+	betaF -60.076
+	ESS 0.976859
+162.5170373916626
+ ==  Epoch 700 metrics ==
+	loss -0.0340528
+	varF -60.0671
+	var_varF 0.0185466
+	betaF -60.0764
+	ESS 0.980675
+180.43604135513306
+ ==  Epoch 800 metrics ==
+	loss -0.0289052
+	varF -60.0684
+	var_varF 0.0157074
+	betaF -60.0763
+	ESS 0.983729
+198.47621846199036
+ ==  Epoch 900 metrics ==
+	loss -0.0269778
+	varF -60.0694
+	var_varF 0.0137502
+	betaF -60.0762
+	ESS 0.98586
+216.53533339500427
+ ==  Epoch 1000 metrics ==
+	loss -0.0223637
+	varF -60.0702
+	var_varF 0.0120473
+	betaF -60.0763
+	ESS 0.987632
+234.63129830360413
+Time taken for this level now180.19065165519714
+Unfreezing and training up to level 3
+
+ ==  Epoch 100 metrics ==
+	loss -0.361904
+	varF -238.258
+	var_varF 0.2485
+	betaF -238.387
+	ESS 0.782554
+316.9604597091675
+ ==  Epoch 200 metrics ==
+	loss -0.377391
+	varF -238.34
+	var_varF 0.0958857
+	betaF -238.387
+	ESS 0.908017
+398.9445707798004
+ ==  Epoch 300 metrics ==
+	loss -0.281506
+	varF -238.349
+	var_varF 0.0767859
+	betaF -238.387
+	ESS 0.924819
+481.0872654914856
+ ==  Epoch 400 metrics ==
+	loss -0.226355
+	varF -238.355
+	var_varF 0.0641049
+	betaF -238.387
+	ESS 0.936923
+563.2975358963013
+ ==  Epoch 500 metrics ==
+	loss -0.192472
+	varF -238.36
+	var_varF 0.0546299
+	betaF -238.387
+	ESS 0.945919
+645.4029295444489
+ ==  Epoch 600 metrics ==
+	loss -0.171206
+	varF -238.363
+	var_varF 0.0466161
+	betaF -238.387
+	ESS 0.953775
+727.7596755027771
+ ==  Epoch 700 metrics ==
+	loss -0.14797
+	varF -238.366
+	var_varF 0.041509
+	betaF -238.387
+	ESS 0.95875
+810.150603055954
+ ==  Epoch 800 metrics ==
+	loss -0.129321
+	varF -238.369
+	var_varF 0.0371541
+	betaF -238.387
+	ESS 0.962903
+892.63037109375
+ ==  Epoch 900 metrics ==
+	loss -0.123739
+	varF -238.37
+	var_varF 0.0336186
+	betaF -238.387
+	ESS 0.966482
+975.062361240387
+ ==  Epoch 1000 metrics ==
+	loss -0.107353
+	varF -238.372
+	var_varF 0.0307133
+	betaF -238.387
+	ESS 0.969294
+1057.4695653915405
+ ==  Epoch 1100 metrics ==
+	loss -0.107293
+	varF -238.373
+	var_varF 0.0287119
+	betaF -238.387
+	ESS 0.97127
+1139.8725926876068
+ ==  Epoch 1200 metrics ==
+	loss -0.0959385
+	varF -238.374
+	var_varF 0.0262514
+	betaF -238.387
+	ESS 0.97376
+1222.3329739570618
+ ==  Epoch 1300 metrics ==
+	loss -0.0899514
+	varF -238.375
+	var_varF 0.0245691
+	betaF -238.387
+	ESS 0.975411
+1304.7631576061249
+ ==  Epoch 1400 metrics ==
+	loss -0.0902885
+	varF -238.375
+	var_varF 0.0228662
+	betaF -238.387
+	ESS 0.97707
+1387.2329037189484
+ ==  Epoch 1500 metrics ==
+	loss -0.0861195
+	varF -238.376
+	var_varF 0.021575
+	betaF -238.387
+	ESS 0.978387
+1469.6859676837921
+ ==  Epoch 1600 metrics ==
+	loss -0.0811816
+	varF -238.377
+	var_varF 0.0203195
+	betaF -238.387
+	ESS 0.979655
+1552.1380548477173
+ ==  Epoch 1700 metrics ==
+	loss -0.0786012
+	varF -238.378
+	var_varF 0.0190658
+	betaF -238.387
+	ESS 0.980922
+1634.6697928905487
+ ==  Epoch 1800 metrics ==
+	loss -0.0721782
+	varF -238.378
+	var_varF 0.0182304
+	betaF -238.387
+	ESS 0.98177
+1717.0793373584747
+ ==  Epoch 1900 metrics ==
+	loss -0.0787321
+	varF -238.378
+	var_varF 0.0173936
+	betaF -238.387
+	ESS 0.98257
+1799.719538450241
+ ==  Epoch 2000 metrics ==
+	loss -0.0665633
+	varF -238.379
+	var_varF 0.0164379
+	betaF -238.387
+	ESS 0.983571
+1882.4436044692993
+Time taken for this level now1647.814337015152
+Unfreezing and training up to level 4
+
+ ==  Epoch 100 metrics ==
+	loss -1.20619
+	varF -951.106
+	var_varF 1.02768
+	betaF -951.646
+	ESS 0.502318
+2151.51047539711
+ ==  Epoch 200 metrics ==
+	loss -1.68889
+	varF -951.483
+	var_varF 0.318805
+	betaF -951.641
+	ESS 0.729018
+2421.595826148987
+ ==  Epoch 300 metrics ==
+	loss -1.25248
+	varF -951.511
+	var_varF 0.252738
+	betaF -951.636
+	ESS 0.777483
+2691.145621776581
+ ==  Epoch 400 metrics ==
+	loss -1.01047
+	varF -951.53
+	var_varF 0.214621
+	betaF -951.637
+	ESS 0.804161
+2960.3772299289703
+ ==  Epoch 500 metrics ==
+	loss -0.934126
+	varF -951.54
+	var_varF 0.197437
+	betaF -951.638
+	ESS 0.820726
+3230.103481531143
+ ==  Epoch 600 metrics ==
+	loss -0.693653
+	varF -951.549
+	var_varF 0.184284
+	betaF -951.641
+	ESS 0.829629
+3499.3047103881836
+ ==  Epoch 700 metrics ==
+	loss -0.743693
+	varF -951.559
+	var_varF 0.163396
+	betaF -951.64
+	ESS 0.848612
+3769.2659595012665
+ ==  Epoch 800 metrics ==
+	loss -0.70381
+	varF -951.562
+	var_varF 0.158731
+	betaF -951.641
+	ESS 0.85271
+4039.252055644989
+ ==  Epoch 900 metrics ==
+	loss -0.653535
+	varF -951.572
+	var_varF 0.14044
+	betaF -951.642
+	ESS 0.868127
+4308.34200668335
+ ==  Epoch 1000 metrics ==
+	loss -0.647844
+	varF -951.568
+	var_varF 0.141898
+	betaF -951.639
+	ESS 0.865376
+4578.621092796326
+ ==  Epoch 1100 metrics ==
+	loss -0.585505
+	varF -951.565
+	var_varF 0.149619
+	betaF -951.639
+	ESS 0.86082
+4848.831250190735
+ ==  Epoch 1200 metrics ==
+	loss -0.615478
+	varF -951.571
+	var_varF 0.142162
+	betaF -951.642
+	ESS 0.865205
+5119.672243595123
+ ==  Epoch 1300 metrics ==
+	loss -0.520057
+	varF -951.571
+	var_varF 0.141132
+	betaF -951.641
+	ESS 0.865383
+5389.83535861969
+ ==  Epoch 1400 metrics ==
+	loss -0.572541
+	varF -951.58
+	var_varF 0.121904
+	betaF -951.641
+	ESS 0.884059
+5660.580141544342
+ ==  Epoch 1500 metrics ==
+	loss -0.599089
+	varF -951.564
+	var_varF 0.152644
+	betaF -951.64
+	ESS 0.85764
+5929.7449696063995
+Time taken for this level now4047.2970728874207
+Unfreezing and training up to level 5
+
+ ==  Epoch 100 metrics ==
+	loss -4.26924
+	varF -3802.28
+	var_varF 4.59999
+	betaF -3804.32
+	ESS 0.143083
+6472.75946688652
+ ==  Epoch 200 metrics ==
+	loss -6.90711
+	varF -3803.59
+	var_varF 2.20507
+	betaF -3804.66
+	ESS 0.217011
+7012.711818695068
+ ==  Epoch 300 metrics ==
+	loss -8.50611
+	varF -3803.78
+	var_varF 1.75263
+	betaF -3804.61
+	ESS 0.281258
+7551.866884469986
+ ==  Epoch 400 metrics ==
+	loss -8.22063
+	varF -3803.79
+	var_varF 1.75359
+	betaF -3804.65
+	ESS 0.268663
+8091.467609643936
+ ==  Epoch 500 metrics ==
+	loss -5.20415
+	varF -3804.09
+	var_varF 1.15307
+	betaF -3804.66
+	ESS 0.381676
+8632.041209936142
+ ==  Epoch 600 metrics ==
+	loss -5.69578
+	varF -3804.05
+	var_varF 1.27734
+	betaF -3804.67
+	ESS 0.349071
+9171.415881156921
+ ==  Epoch 700 metrics ==
+	loss -5.99161
+	varF -3804.14
+	var_varF 1.04982
+	betaF -3804.66
+	ESS 0.408819
+9711.321922302246
+ ==  Epoch 800 metrics ==
+	loss -3.924
+	varF -3804.15
+	var_varF 1.05209
+	betaF -3804.66
+	ESS 0.403307
+10250.486459732056
+ ==  Epoch 900 metrics ==
+	loss -5.62186
+	varF -3804.13
+	var_varF 1.08407
+	betaF -3804.67
+	ESS 0.389462
+10788.120025634766
+ ==  Epoch 1000 metrics ==
+	loss -5.30791
+	varF -3804.07
+	var_varF 1.24165
+	betaF -3804.67
+	ESS 0.366805
+11326.37979388237
+ ==  Epoch 1100 metrics ==
+	loss -5.5359
+	varF -3804.18
+	var_varF 1.01467
+	betaF -3804.68
+	ESS 0.412921
+11865.89902806282
+ ==  Epoch 1200 metrics ==
+	loss -3.75927
+	varF -3804.18
+	var_varF 0.985889
+	betaF -3804.67
+	ESS 0.423711
+12404.322133302689
+ ==  Epoch 1300 metrics ==
+	loss -4.79327
+	varF -3804.21
+	var_varF 0.980042
+	betaF -3804.69
+	ESS 0.439212
+12938.332940340042
+ ==  Epoch 1400 metrics ==
+	loss -5.02088
+	varF -3804.16
+	var_varF 1.05874
+	betaF -3804.67
+	ESS 0.413221
+13474.15174150467
+ ==  Epoch 1500 metrics ==
+	loss -4.92965
+	varF -3804.22
+	var_varF 0.932423
+	betaF -3804.69
+	ESS 0.432941
+14009.77204656601Total time taken :14009.7727394104

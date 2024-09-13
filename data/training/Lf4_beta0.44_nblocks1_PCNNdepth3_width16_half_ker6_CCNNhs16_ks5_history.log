@@ -1,0 +1,79 @@
+Device cuda NVIDIA A100-SXM-64GB x4
+Lf 4 beta 0.44
+nblocks 1
+batch size [10000, 10000, 10000, 5024, 512, 96, 16]
+lr [0.001, 0.001]
+
+ ==  Epoch 100 metrics ==
+	loss -0.287558
+	varF -3.56824
+	var_varF 1.6505
+	betaF -4.37774
+	ESS 0.47344
+12.291778564453125
+ ==  Epoch 200 metrics ==
+	loss -0.0124617
+	varF -4.35433
+	var_varF 0.0353151
+	betaF -4.37768
+	ESS 0.898912
+13.765296697616577
+ ==  Epoch 300 metrics ==
+	loss -0.0105749
+	varF -4.37466
+	var_varF 0.00485746
+	betaF -4.37726
+	ESS 0.993306
+15.353109359741211
+ ==  Epoch 400 metrics ==
+	loss -0.00477197
+	varF -4.37636
+	var_varF 0.00167215
+	betaF -4.37737
+	ESS 0.996073
+16.712321758270264
+ ==  Epoch 500 metrics ==
+	loss -0.00274559
+	varF -4.37678
+	var_varF 0.000792248
+	betaF -4.37739
+	ESS 0.996258
+18.06904935836792
+Time taken for this level now18.069496154785156
+Unfreezing and training up to level 1
+
+ ==  Epoch 100 metrics ==
+	loss -0.547165
+	varF -15.1821
+	var_varF 0.714327
+	betaF -15.5037
+	ESS 0.76011
+21.40022039413452
+ ==  Epoch 200 metrics ==
+	loss -0.0454939
+	varF -15.4894
+	var_varF 0.0295578
+	betaF -15.5045
+	ESS 0.967149
+24.586053609848022
+ ==  Epoch 300 metrics ==
+	loss -0.039043
+	varF -15.4925
+	var_varF 0.0234679
+	betaF -15.5045
+	ESS 0.974441
+27.774085998535156
+ ==  Epoch 400 metrics ==
+	loss -0.0296096
+	varF -15.4955
+	var_varF 0.0183007
+	betaF -15.5048
+	ESS 0.980239
+30.96943497657776
+ ==  Epoch 500 metrics ==
+	loss -0.021754
+	varF -15.4972
+	var_varF 0.0146715
+	betaF -15.5046
+	ESS 0.984389
+34.17270827293396Total time taken :34.17356014251709

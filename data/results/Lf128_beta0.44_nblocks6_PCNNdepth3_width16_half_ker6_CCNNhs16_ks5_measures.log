@@ -1,0 +1,4 @@
+Device cuda NVIDIA A100-SXM-64GB x4
+Lf 128 beta 0.44
+nblocks 6
+batch size 1000 nmeas 1000
