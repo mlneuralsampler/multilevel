@@ -576,7 +576,6 @@ class NeuralVANMultilevel(torch.nn.Module):
             optimizer.zero_grad()
             samples, log_prob = self(batch_size)
             with torch.no_grad():
-                print('train', log_prob.shape)
                 w = self.energy(samples.squeeze(), self.beta)+log_prob
                 ess, betaF = compute_metrics(w)
             loss = torch.mean((w-w.mean()) * log_prob)
@@ -779,3 +778,6 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
         print("Total time taken :", time.time() - t0)
         history['time'] = time.time() - t0
         return history
+
+    def vanilla_training(self,nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path,on_file):
+        return super().train(nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path)
