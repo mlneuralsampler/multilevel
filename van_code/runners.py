@@ -79,12 +79,12 @@ def training(args):
 
     optimizer=torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.92, patience=args.patience, min_lr=1e-07, verbose=True)
-    
+
     if not args.vanilla_train:
         history=model.train(nepochs,bs,lr,print_freq,history_file_training,main_path+'model/'+path,True,True)
     else:
         history=model.vanilla_training(args.vanilla_epochs,args.vanilla_bs,optimizer,scheduler,print_freq,history_file_training,weights_path,True)
-        
+
     with open(history_dict, 'wb') as f:
         pickle.dump(history, f)
     save(model,optimizer,weights_path)
@@ -168,7 +168,7 @@ def measures_IMH(args):
     load(model,optimizer,weights_path)
     model.eval()
     with torch.no_grad():
-    ensemble=make_mcmc_ensemble(model, bs,args.data_cluster,model.device)
+        ensemble=make_mcmc_ensemble(model, bs,args.data_cluster,model.device)
     with open(measures_path, 'a') as f:
         f.write(str(ensemble['time'])+'\n')
     cluster_analysis(np.asarray(ensemble['x']).reshape((-1,model.Lf,model.Lf) ),model.energy,args.beta,measures_path)
