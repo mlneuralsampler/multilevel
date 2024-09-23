@@ -38,7 +38,18 @@ parser.add_argument("--bs", nargs="*", type=int,default=[10000,10000,10000,500,1
 parser.add_argument("--lr",type=float, default=0.001 )
 parser.add_argument("--print_freq", type=int, default=100)
 parser.add_argument("--patience", type=int, default=1000)
-
+#######
+#######
+#WARNING!!!!!!
+#If you train with vanilla (standard) method be careful because weights are
+#saved in the same dir of others trainings
+#Use the argumnet --hyp with an integer number to generate different directories
+#for weights and metrics
+#!!!!!!!!
+#########
+parser.add_argument("--vanilla_train", action="store_true") #vannilla train
+parser.add_argument("--vanilla_epochs", type=int, default=100)
+parser.add_argument("--vanilla_bs", type=int, default=16)
 #### Sampling
 parser.add_argument("--measures", action="store_true")
 parser.add_argument("--measures_md", action="store_true") #mode dropping
@@ -49,7 +60,8 @@ parser.add_argument("--data_cluster", type=int, default=1000000)
 
 ## Paths
 parser.add_argument("--main_path", type=str, default="/leonardo_work/INF24_sft_1/ecellini/multilevelRG/" )
-
+###Use the following to generate different directories for same model in order
+#to not overwrite files
 parser.add_argument("--hyp", type=int, default=0 )
 parser.add_argument("--fix_seed", action="store_true")
 parser.add_argument("--seed", type=int, default=137)
