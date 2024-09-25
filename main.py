@@ -59,7 +59,7 @@ parser.add_argument("--nmeas", type=int, default=1000)
 parser.add_argument("--data_cluster", type=int, default=1000000)
 
 ## Paths
-parser.add_argument("--main_path", type=str, default="/leonardo_work/INF24_sft_1/ecellini/multilevelRG/" )
+parser.add_argument("--main_path", type=str, default="" )
 ###Use the following to generate different directories for same model in order
 #to not overwrite files
 parser.add_argument("--hyp", type=int, default=0 )
