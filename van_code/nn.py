@@ -654,8 +654,6 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
     '''
     def __init__(self, Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device):
         super().__init__(Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device)
-        self.layers.module.current_level = 0
-        self.layers.module.freeze_all_layers()
 
     def eval(self,):
         self.layers.module.current_level = self.nlevels-1
@@ -671,6 +669,8 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             pretrained=True,
             on_file=True,
     ):
+        self.layers.module.current_level = 0
+        self.layers.module.freeze_all_layers()
         history = {'loss': [], 'varF': [], 'var_varF': [], 'betaF': [], 'ESS': []}
         t0 = time.time()
         scaler = torch.cuda.amp.GradScaler() # this function will be deprecated. When this happens use function below.
