@@ -42,14 +42,16 @@ $ python3 main.py --measures_imh
 
 ## Baselines
 In the paper, our approach is compared in general to three different baselines:
-- **VAN**: method from [Wu et al., Phys. Rev. Lett. (2019)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.122.080602)
-- **HAN**: method from [Bialas et al., Comp. Phys. Comms. (2022)](https://www.sciencedirect.com/science/article/pii/S0010465522002211)
-- **Cluster**: state-of-the art method for collective sampling of spin systems by  [Wolff Ulli, Phys. Rev. Lett. (1989)](https://link.aps.org/doi/10.1103/PhysRevLett.62.361)
+- **VAN**: method from [Wu et al., Phys. Rev. Lett. (2019)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.122.080602).
+- **HAN**: method from [Bialas et al., Comp. Phys. Comms. (2022)](https://www.sciencedirect.com/science/article/pii/S0010465522002211).
+- **Cluster-AIS**: state-of-the art method for collective sampling of spin systems by  [Wolff Ulli, Phys. Rev. Lett. (1989)](https://link.aps.org/doi/10.1103/PhysRevLett.62.361) combined with annealed importance sampling (AIS) [Radford M. Neal, Statistics and computing 11 (2001)](https://link.springer.com/article/10.1023/a:1008923215028).
+- **MLMC-HB**: multilevel Monte Carlo with Heathbath as introduced in [Jansen et al., Phys. Rev. D 102 (2020)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.102.114512).
 
 For the baselines we used the following resources:
 - **VAN**: the VAN baselines were run using the code provided in [https://github.com/wdphy16/stat-mech-van](https://github.com/wdphy16/stat-mech-van) with only minor modifications and slight hyperparameter tuning. 
 - **HAN**: for HAN, we requested the code to the authors of the paper who kindly shared the source code for reproducing their experiments with us. 
-- **Cluster**: for the cluster method we based our implementation on a highly optimized code for GPU based on [Komura et al., Comp. Phys. Sim. (2012)](https://www.sciencedirect.com/science/article/pii/S001046551200032X?via%3Dihub) and [Komura et al., Comp. Phys. Sim. (2014)](https://www.sciencedirect.com/science/article/pii/S0010465513003743?via%3Dihub)
+- **Cluster**: for the cluster method we based our implementation on a highly optimized code for GPU based on [Komura et al., Comp. Phys. Sim. (2012)](https://www.sciencedirect.com/science/article/pii/S001046551200032X?via%3Dihub) and [Komura et al., Comp. Phys. Sim. (2014)](https://www.sciencedirect.com/science/article/pii/S0010465513003743?via%3Dihub).
+- **MLMC-HB**: custom implementation of the algorithm following [Jansen et al., Phys. Rev. D 102 (2020)](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.102.114512).
 
 While the **VAN** experiments can be run from this repository, we do not provide the implementations of the **HAN** as the code we used is intellectual property of the authors. 
 As this is not publicly available, we refer to them in case the reader is interested in re-run the **HAN** experiments as well.
