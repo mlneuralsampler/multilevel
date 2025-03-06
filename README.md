@@ -1,5 +1,5 @@
 # Multilevel Renormalization Group for Autoregressive Neural Networks
-This is the code for the paper [A Multilevel Approach for Scalable Autoregressive Neural Networks](todo-link).
+This is the code for the paper [A Multilevel Approach for Scalable Autoregressive Neural Networks](https://openreview.net/forum?id=YcUV5apdlq).
 
 ## Installation
 You can follow the steps below to build the code from source. 
@@ -35,7 +35,7 @@ the model. To compute the metrics associated with **importance sampling** one ca
 ```bash
 $ python3 main.py --measures_md 
 ```
-to perform unbiased sampling via *neural-mcmc* as discussed in [Nicoli et al., Phys. Rev. E (2019)]()
+to perform unbiased sampling via *neural-mcmc* as discussed in [Nicoli et al., Phys. Rev. E (2019)](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.101.023304)
 ```bash
 $ python3 main.py --measures_imh
 ```
