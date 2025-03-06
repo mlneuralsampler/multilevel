@@ -72,5 +72,14 @@ You'll then find the kernel `multivel` among the possible kernels when opening t
 
 ## References       
 
-If you find this useful, please consider citing        
-ADD BIBTEX
+If you find this useful, please consider citing:
+``` 
+@inproceedings{
+singha2025multilevel,
+title={Multilevel Generative Samplers for Investigating Critical Phenomena},
+author={Ankur Singha and Elia Cellini and Kim Andrea Nicoli and Karl Jansen and Stefan K{\"u}hn and Shinichi Nakajima},
+booktitle={The Thirteenth International Conference on Learning Representations},
+year={2025},
+url={https://openreview.net/forum?id=YcUV5apdlq}
+}
+```       
