@@ -12,7 +12,7 @@ from obs import Obs
 # Main function to run the MCMC simulation and multi-level updates
 def main(args):
     N = args.N  # Lattice size
-    T = 1 / args.beta_c  # Temperature
+    T = 1 / args.beta_c 
     level = args.level
     beta_c = args.beta_c
     beta_I = args.beta_I
