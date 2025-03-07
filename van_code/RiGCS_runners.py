@@ -43,7 +43,6 @@ def init(args):
     net_hyp={'hidden_size':hidden_size_nn,'kernel_size':kernel_size_nn,'epsilon':eps,'level':0,'device':device}
     model =NeuralVANMultilevel_block_wise(Lc, van_hyp, net_hyp, nlevels, hb_last,ising_energy, local_ising_energy, beta, device)
     Lf=model.Lf
-    #  transfer the model layers
     main_path=args.main_path+'data/'
     path='Lf'+str(Lf)+'_beta'+str(beta)+'_nblocks'+str(nlevels)
 
@@ -61,10 +60,8 @@ def init(args):
     return  model, path, info
 
 def training(args):
-    save_weight_full=args.main_path+'RiGCS_training/models/'+'level_'+str(args.n_blocks)+'epochs_'+str(args.train_epoch)+'_'.join(map(str, args.kerne
-
-    model_prev= torch. load_model(save_weight_full)
-    model, path, info, = init(args,pre_model)
+  #  model_prev= torch. load_model(save_weight_full)
+    model, path, info, = init(args)
     nepochs=args.train_epoch
     bs=args.train_bs
     lr=args.lr
@@ -72,8 +69,6 @@ def training(args):
     info+='lr '+str(lr)+'\n'
 
     save_weight=args.main_path+'RiGCS_training/models/'+'level_'+str(args.n_blocks)+'epochs_'+str(args.train_epoch)+'_'.join(map(str, args.kernel_size))+'_RiGCS_model.pth'
-    save_weight_full=args.main_path+'RiGCS_training/models/'+'level_'+str(args.n_blocks)+'epochs_'+str(args.train_epoch)+'_'.join(map(str, args.kernel_size))+'_RiGCS_model_full.pth'
-
     load_weight=args.main_path+'RiGCS_training/models/'+'level_'+str(args.n_blocks-1)+'epochs_'+str(args.pretrain_epoch)+'_'.join(map(str, args.kernel_size))+'_RiGCS_model.pth'
     history_file_training=args.main_path+'RiGCS_training/history/'+path+'_history.log'
     history_dict=args.main_path+'RiGCS_training/history/'+path+'_historyDict.pkl'
@@ -83,7 +78,6 @@ def training(args):
 
     optimizer=torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.92, patience=args.patience, min_lr=1e-07, verbose=True)
-    print("Kernel_size:",args.kernel_size)
     if not args.vanilla_train:
         if args.n_blocks>0:
              saved_state_dict = torch.load(load_weight)
@@ -95,7 +89,6 @@ def training(args):
     with open(history_dict, 'wb') as f:
         pickle.dump(history, f)
     torch.save(model.state_dict(), save_weight)
-    save(model,save_weight_full)
 
 def measures(args):
     model, path, info = init(args)
@@ -173,7 +166,7 @@ def process_multiple_dat_files(model,dat_files, batch_sz, L,bs,beta,nmeas):
             E_clus.append(grab(e_clus))
     print("W shape",len(W))
    # print("After 2nd",t)
-    return np.array(Wf).flatten(),np.array(W).flatten(),np.array(M).flatten(),np.array(E).flatten(),np.array(M_clus).flatten(), np.array(E_clus).flatten(), t
+    return np.array(Wf).flatten(),np.array(W).flatten(),np.array(M).flatten(),np.array(E).flatten(),np.array(M_clus).flatten(), np.array(E_clus).flatten(),t
  # Perform inference on the batch
 def measures_modedrop_old(args):
     model, path, info = init(args)
@@ -231,7 +224,7 @@ def measures_modedrop(args):
     model.eval()
     data_path = main_path+'config/{}'.format(model.Lf)
     data_files = glob.glob(f'{data_path}/*.dat')
-    Wf,W, M,E,M_clus, E_clus, t=process_multiple_dat_files(model,data_files,args.mc_bs,model.Lf,bs,args.beta,nmeas)
+    Wf,W, M,E,M_clus, E_clus,t=process_multiple_dat_files(model,data_files,args.mc_bs,model.Lf,bs,args.beta,nmeas)
     print(np.array(Wf).shape, type(W), type(M), np.array(E).shape, np.array(M_clus).shape, np.array(E_clus).shape)
     sys.stdout.flush()
 

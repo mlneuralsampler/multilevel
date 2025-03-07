@@ -477,19 +477,6 @@ class Multilevel(torch.nn.Module):
 
         self.layers = torch.nn.ModuleList(layers)
 
-    def freeze_all_layers(self):
-        """Freeze all layers initially."""
-        for layer in self.layers:
-            for param in layer.parameters():
-                param.requires_grad = False
-
-    def unfreeze_layers(self, until):
-        """Unfreeze all layers up to and including the specified layer index."""
-        for i, layer in enumerate(self.layers):
-            for param in layer.parameters():
-                param.requires_grad = True
-            if i == until:
-                break
 
     def forward(self, sample, log_prob):
         for i in range(self.current_level + 1):  # Use only the unfreezed layers
@@ -516,20 +503,15 @@ class Multilevel(torch.nn.Module):
         # Get the source and target weights
         source_weights = source_layer.weight.data
         target_weights = target_layer.weight.data
-        # Initialize target weights to zero
-         #target_weights.zero_()
 
         if K_init == K_final:
-             print("Good")
         # If the kernel sizes are the same, copy directly
              target_weights = source_weights.clone()
         elif K_init < K_final:
-             print("Not not 1")
          # Case: K_init is smaller, place the weights in the center of the larger kernel
              center_offset = (K_final - K_init) // 2
              target_weights[:, :, center_offset:center_offset + K_init, center_offset:center_offset + K_init] = source_weights
         else:
-             print("Not good 2")
              # Case: K_init is larger, extract the central part to fit into the smaller kernel
              center_offset = (K_init - K_final) // 2
              target_weights = source_weights[:, :, center_offset:center_offset + K_final, center_offset:center_offset + K_final].clone()
@@ -539,7 +521,6 @@ class Multilevel(torch.nn.Module):
          # Transfer the bias directly if it exists
         if source_layer.bias is not None and target_layer.bias is not None:
              target_layer.bias.data = source_layer.bias.data.clone()
-             print("Is it true :bias")
     def load_diff_kernel(self,level):
         if self.nlevels ==2:
              net1_i = self.layers[level-1].van_upsampling.net_i.net
@@ -580,21 +561,6 @@ class Multilevel(torch.nn.Module):
              for layer1, layer2,c,d in zip(conv_layers_1, conv_layers_2,k1_f,k2_f):
                   if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
                       self.transfer_weights_adaptive(layer1, layer2,c,d)
-    def verify_transfer(self, level):
-        # Verify weights for net_i
-        net1_i = self.layers[level-1].van_upsampling.net_i.net
-        net2_i = self.layers[level].van_upsampling.net_i.net
-        for i, (layer1, layer2) in enumerate(zip(net1_i, net2_i)):
-            if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
-                 print(f"net_i Layer {i}: Weights Equal? {torch.equal(layer1.weight.data, layer2.weight.data)}")
-
-    # Verify weights for net_f
-        if (level+1)<self.nlevels:
-             net1_f = self.layers[level-1].van_upsampling.net_f.net
-             net2_f = self.layers[level].van_upsampling.net_f.net
-             for i, (layer1, layer2) in enumerate(zip(net1_f, net2_f)):
-                  if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
-                       print(f"net_f Layer {i}: Weights Equal? {torch.equal(layer1.weight.data, layer2.weight.data)}")
 
 class NeuralVANMultilevel(torch.nn.Module):
     '''
@@ -754,56 +720,9 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
     '''
     def __init__(self, Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device):
         super().__init__(Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device)
-       # self.layers.module.current_level = nlevels-1
-       # self.layers.module.freeze_all_layers()
 
     def eval(self,):
         self.layers.module.current_level = self.nlevels-1
-    def verify_transfer(self, level):
-         # Verify weights for net_i
-         net1_i = self.layers[level-1].van_upsampling.net_i.net
-         net2_i = self.layers[level].van_upsampling.net_i.net
-         for i, (layer1, layer2) in enumerate(zip(net1_i, net2_i)):
-              if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
-                   print(f"net_i Layer {i}: Weights Equal? {torch.equal(layer1.weight.data, layer2.weight.data)}")
-         # Verify weights for net_f
-         if level+1<self.nlevel:
-             net1_f = self.layers[level-1].van_upsampling.net_f.net
-             net2_f = self.layers[level].van_upsampling.net_f.net
-             for i, (layer1, layer2) in enumerate(zip(net1_f, net2_f)):
-                  if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
-                       print(f"net_f Layer {i}: Weights Equal? {torch.equal(layer1.weight.data, layer2.weight.data)}")
-    def transfer_weights_adaptive(self,source_layer, target_layer,k1,k2):
-        # Get kernel sizes
-        K_init = k1
-        K_final =k2
-        # Get the source and target weights
-        source_weights = source_layer.weight.data
-        target_weights = target_layer.weight.data
-        # Initialize target weights to zero
-         #target_weights.zero_()
-
-        if K_init == K_final:
-             print("Good")
-        # If the kernel sizes are the same, copy directly
-             target_weights = source_weights.clone()
-        elif K_init < K_final:
-             print("Not not 1")
-         # Case: K_init is smaller, place the weights in the center of the larger kernel
-             center_offset = (K_final - K_init) // 2
-             target_weights[:, :, center_offset:center_offset + K_init, center_offset:center_offset + K_init] = source_weights
-        else:
-             print("Not good 2")
-             # Case: K_init is larger, extract the central part to fit into the smaller kernel
-             center_offset = (K_init - K_final) // 2
-             target_weights = source_weights[:, :, center_offset:center_offset + K_final, center_offset:center_offset + K_final].clone()
-         # Assign the adapted weights to the target layer
-        target_layer.weight.data = target_weights
-
-         # Transfer the bias directly if it exists
-        if source_layer.bias is not None and target_layer.bias is not None:
-             target_layer.bias.data = source_layer.bias.data.clone()
-             print("Is it true :bias")
     def train(
             self,
             nepochs,
@@ -860,13 +779,11 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             print("Total time taken :", time.time() - t0)
             history['time'] = time.time() - t0
 
-#            torch.save(self.state_dict(), "weights_path")
-               #train the rest of the model and save
         if self.nlevels>0:
             if self.nlevels>1:
                 level=self.nlevels-1
                 self.layers.module.load_diff_kernel(level)  # Transfer weights from previous layers
-                self.layers.module.verify_transfer(level)
+               # self.layers.module.verify_transfer(level)
             optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, list(self.parameters())), lr=lr)
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer,
@@ -911,75 +828,5 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             print("Total time taken :", time.time() - t0)
             history['time'] = time.time() - t0
         return history
-           #   load all block except the last two where you transfer the weight
-#        ep = 0
-#        tvan = t0
-#        for level in range(self.nlevels):
-#            print("Time taken for this level now", time.time() - tvan,)
-#            with open(history_path, 'a') as f:
-#                f.write("\n"+"Time taken for this level now"+str(time.time() - tvan)+"\n")
-#                f.write(f"Unfreezing and training up to level {level+1}"+"\n")
-#            tvan = time.time()
-#            print(f"Unfreezing and training up to level {level+1}")
-#            self.layers.module.unfreeze_layers(level)
-#            self.layers.module.current_level = level
-#            if flex_kernel:
-#                if level > 0:
-#                    self.layers.module.load_diff_kernel(level)  # Transfer weights from previous layers
-#                    self.layers.module.verify_transfer(level)
-#            else:
-#                 if level>0:
-#                     self.layers.module.load_pretrained(level)
-#            ep += 1
-#            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, list(self.parameters())), lr=lr[ep])
-#            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-#                optimizer,
-#                'min',
-#                factor=0.92,
-#                patience=5000,
-#                min_lr=1e-07
-#            )
-#            for i in range(nepochs[ep]):
-#                optimizer.zero_grad()
-#
-#                with torch.cuda.amp.autocast(): #this function will be deprecated. If this happens use function below.
-#                #with torch.amp.autocast(str(self.device)):  # Added for mixed precision training
-#                    samples, log_prob = self(batch_size[ep])
-#                    with torch.no_grad():
-#                        w = self.energy(samples.squeeze(), self.beta) + log_prob
-#                        ess, betaF = compute_metrics(w)
-#                    loss = torch.mean((w - w.mean()) * log_prob)
-#                del samples
-#                scaler.scale(loss).backward()  # Added for mixed precision training
-#                scaler.step(optimizer)
-#                scaler.update()  # Added for mixed precision training# Added for mixed precision training
-#                scheduler.step(w.mean())
-#               history['loss'].append(grab(loss))
-#                history['varF'].append(grab(w.mean()))
-#                history['var_varF'].append(grab(w.var()))
-#                history['betaF'].append(grab(betaF))
-#                history['ESS'].append(grab(ess))
-#                if (i + 1) % print_freq == 0:
-#                    if on_file:
-#                        print_metrics(history_path, history, i + 1, print_freq, t0)
-#
-#                    print(f'step: {i + 1},'
-#                          f' loss: {grab(loss)},'
-#                          f' w_mean: {grab(w.mean())},'
-#                          f' w_var: {grab(w.var())},'
-#                          f' ess: {grab(ess)},'
-#                          f' free_en: {grab(betaF)},'
-#                          f' log_prob: {grab(log_prob.mean())}')
-#
-       #             if level == self.nlevels-1 and (i+1) > 2999:
-       #                 save(self, optimizer, w_path+'_'+str(i+1)+'.chckpnt')
-       #             if level == self.nlevels-1 and (i+1) % 1000 == 0:
-       #                 save(self, optimizer, w_path+'_'+str(i+1)+'.chckpnt')
-       # with open(history_path, 'a') as f:
-       #     f.write("Total time taken :"+str(time.time() - t0)+"\n")
-       # print("Total time taken :", time.time() - t0)
-       # history['time'] = time.time() - t0
-       # return history
-
     def vanilla_training(self,nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path,on_file):
         return super().train(nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path)
