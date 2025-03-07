@@ -30,7 +30,6 @@ def bootstrap_rev(work, L,ess, num_resamples=1000):
         resample = np.random.choice(work, size=N, replace=True)
         betaF_values[i] = calculate_rev(resample,L,ess)
     mean_betaF = np.mean(betaF_values)
-    #std_betaF = np.std(betaF_values)
     lower_bound = np.percentile(betaF_values, 16)
     upper_bound = np.percentile(betaF_values, 84)
     
