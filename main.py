@@ -1,7 +1,7 @@
 
 import argparse
 import random
-from van_code.runners import *
+from van_code.RiGCS_runners import *
 
 
 
@@ -24,17 +24,20 @@ parser.add_argument("--eps", type=float, default=1.e-7)
 
 ####### Course/fine net
 parser.add_argument("--hidden_sizes", nargs="*", type=int, default=[16])
-parser.add_argument("--kernel_size", nargs="*", type=int, default=[5,3])
-
+parser.add_argument('--kernel_size', nargs="*", type=int, help="Kernel sizes")
 ### Multilevels
+parser.add_argument("--pretrain_epoch", type=int, default=2000)
+parser.add_argument("--train_epoch", type=int, default=3000)
+parser.add_argument("--train_bs", type=int, default=100)
 
 parser.add_argument("--n_blocks", type=int, default=3)
 parser.add_argument("--not_hb_last", action="store_false")
 
 ### training
 parser.add_argument("--train", action="store_true")
+parser.add_argument("--flex_kernel", action="store_true")
 parser.add_argument("--epochs", nargs="*", type=int, default=[1000,1500,1500,1500,1500,1500,1500])
-parser.add_argument("--bs", nargs="*", type=int,default=[10000,10000,10000,500,100,96,16]) #default=[1024,1024,1024,512,256,96,16])
+parser.add_argument("--bs", nargs="*", type=int,default=[1024,1024,1024,512,256,96,16]) #default=[1024,1024,1024,512,256,96,16])
 parser.add_argument("--lr",type=float, default=0.001 )
 parser.add_argument("--print_freq", type=int, default=100)
 parser.add_argument("--patience", type=int, default=1000)
@@ -56,6 +59,7 @@ parser.add_argument("--measures_md", action="store_true") #mode dropping
 parser.add_argument("--measures_imh", action="store_true") #mode independent MH
 parser.add_argument("--bs_eval", type=int, default=1000)
 parser.add_argument("--nmeas", type=int, default=1000)
+parser.add_argument("--mc_bs", type=int, default=10000)
 parser.add_argument("--data_cluster", type=int, default=1000000)
 
 ## Paths
