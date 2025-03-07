@@ -1,12 +1,16 @@
+
 import torch
 import torch.nn as nn
 import numpy as np
 from numpy import log
 from van_code.utils import compute_metrics, grab, print_metrics, make_checker_mask, save
 import time
+import os
+import sys
+import gc
+sys.stdout.flush()
 
 
-###General (standard) CNN
 def make_conv_net(
         hidden_sizes,
         kernel_size,
@@ -245,6 +249,7 @@ class VAN_CNN(torch.nn.Module):
         self.kernel_size=kwargs['kernel_size']
         self.epsilon = kwargs['epsilon']
         self.device=kwargs['device']
+        self.mixture_components=6
         self.net=make_conv_net(hidden_sizes=self.hidden_size, kernel_size=self.kernel_size)#.to(self.device)
         ### level=0 -> intermediate level
         ### level=1 -> fine level
@@ -405,6 +410,9 @@ class Multilevel(torch.nn.Module):
     def _init_blocks(self, net_hyp, hb_last, local_energy, beta, device):
         layers = []
         j = 0
+        print("k_size",net_hyp['kernel_size'])
+       # net_hyp['kernel_size'] = [net_hyp['kernel_size'][i:i + 2] for i in range(0, len(net_hyp['kernel_size']), 2)]
+       # net_hyp['hidden_size']=net_hyp['hidden_size'].reshape(-1,2)
         for i in range(self.nlevels-1):
             self.Lf *= 2
             embedding = EmbeddingC_F(self.Lf, int(self.in_channels), device)
@@ -416,6 +424,7 @@ class Multilevel(torch.nn.Module):
                 level=0,
                 device=device
             )
+            print('nnot gd',j,net_hyp['kernel_size'][j])
             j += 1
             net_f = VAN_CNN(
                 hidden_size=net_hyp['hidden_size'][j],
@@ -425,11 +434,13 @@ class Multilevel(torch.nn.Module):
                 level=1,
                 device=device
             )
+            print(j,net_hyp['kernel_size'][j])
             j += 1
             van_cnn = VANUpsampling(net_i, net_f)
             layers.append(MultilevelBlock(embedding, van_cnn))
 
         self.Lf *= 2
+        print('Lf=',self.Lf)
         embedding = EmbeddingC_F(self.Lf, int(self.in_channels), device)
         net_i = VAN_CNN(
             hidden_size=net_hyp['hidden_size'][j],
@@ -439,6 +450,7 @@ class Multilevel(torch.nn.Module):
             level=0,
             device=device
         )
+        print(j, net_hyp['kernel_size'][j])
 
         if hb_last:
             net_f = HB_level(
@@ -465,19 +477,6 @@ class Multilevel(torch.nn.Module):
 
         self.layers = torch.nn.ModuleList(layers)
 
-    def freeze_all_layers(self):
-        """Freeze all layers initially."""
-        for layer in self.layers:
-            for param in layer.parameters():
-                param.requires_grad = False
-
-    def unfreeze_layers(self, until):
-        """Unfreeze all layers up to and including the specified layer index."""
-        for i, layer in enumerate(self.layers):
-            for param in layer.parameters():
-                param.requires_grad = True
-            if i == until:
-                break
 
     def forward(self, sample, log_prob):
         for i in range(self.current_level + 1):  # Use only the unfreezed layers
@@ -490,7 +489,6 @@ class Multilevel(torch.nn.Module):
             sample, dlog = self.layers[i].reverse(sample)
             log_prob = log_prob + dlog
         return sample, log_prob
-
     def load_pretrained(self, level):
         if (level+1) == self.nlevels:
             prev_layer = self.layers[level-1].van_upsampling.net_i
@@ -498,7 +496,71 @@ class Multilevel(torch.nn.Module):
         else:
             prev_layer = self.layers[level-1]
             self.layers[level].load_state_dict(prev_layer.state_dict())
+    def transfer_weights_adaptive(self,source_layer, target_layer,k1,k2):
+        # Get kernel sizes
+        K_init = k1
+        K_final =k2
+        # Get the source and target weights
+        source_weights = source_layer.weight.data
+        target_weights = target_layer.weight.data
 
+        if K_init == K_final:
+        # If the kernel sizes are the same, copy directly
+             target_weights = source_weights.clone()
+        elif K_init < K_final:
+         # Case: K_init is smaller, place the weights in the center of the larger kernel
+             center_offset = (K_final - K_init) // 2
+             target_weights[:, :, center_offset:center_offset + K_init, center_offset:center_offset + K_init] = source_weights
+        else:
+             # Case: K_init is larger, extract the central part to fit into the smaller kernel
+             center_offset = (K_init - K_final) // 2
+             target_weights = source_weights[:, :, center_offset:center_offset + K_final, center_offset:center_offset + K_final].clone()
+         # Assign the adapted weights to the target layer
+        target_layer.weight.data = target_weights
+
+         # Transfer the bias directly if it exists
+        if source_layer.bias is not None and target_layer.bias is not None:
+             target_layer.bias.data = source_layer.bias.data.clone()
+    def load_diff_kernel(self,level):
+        if self.nlevels ==2:
+             net1_i = self.layers[level-1].van_upsampling.net_i.net
+             net2_i=self.layers[level].van_upsampling.net_i.net
+             e=self.layers[level-1].van_upsampling.net_i.kernel_size
+             f=self.layers[level].van_upsampling.net_i.kernel_size
+             conv_layers_1 = [layer for layer in net1_i if isinstance(layer, nn.Conv2d)]
+             conv_layers_2 = [layer for layer in net2_i if isinstance(layer, nn.Conv2d)]
+
+
+             for layer1, layer2,e1,f1 in zip(conv_layers_1, conv_layers_2,e,f):
+                  print(e1,f1)
+                  if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
+                       self.transfer_weights_adaptive(layer1, layer2,e1,f1)
+        else:
+             net1_i = self.layers[level-1].van_upsampling.net_i.net
+             net2_i=self.layers[level].van_upsampling.net_i.net
+             e=self.layers[level-1].van_upsampling.net_i.kernel_size
+             f=self.layers[level].van_upsampling.net_i.kernel_size
+             conv_layers_1 = [layer for layer in net1_i if isinstance(layer, nn.Conv2d)]
+             conv_layers_2 = [layer for layer in net2_i if isinstance(layer, nn.Conv2d)]
+
+
+             for layer1, layer2,e1,f1 in zip(conv_layers_1, conv_layers_2,e,f):
+                  print(e1,f1)
+                  if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
+                       self.transfer_weights_adaptive(layer1, layer2,e1,f1)
+
+             net_prev_f= self.layers[level-2].van_upsampling.net_f
+             net1_f=net_prev_f.net
+             k1_f=net_prev_f.kernel_size
+             net_curr_f=self.layers[level-1].van_upsampling.net_f
+             net2_f=net_curr_f.net
+             k2_f=net_curr_f.kernel_size
+             conv_layers_1 = [layer for layer in net1_f if isinstance(layer, nn.Conv2d)]
+             conv_layers_2 = [layer for layer in net2_f if isinstance(layer, nn.Conv2d)]
+
+             for layer1, layer2,c,d in zip(conv_layers_1, conv_layers_2,k1_f,k2_f):
+                  if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
+                      self.transfer_weights_adaptive(layer1, layer2,c,d)
 
 class NeuralVANMultilevel(torch.nn.Module):
     '''
@@ -563,7 +625,9 @@ class NeuralVANMultilevel(torch.nn.Module):
             history_path,
             weights_path,
             on_file=True
-    ):
+    ):     
+        scaler = torch.cuda.amp.GradScaler() # this function will be deprecated. When this happens use function below.
+
         history = {
             'loss': [],
             'varF': [],
@@ -574,13 +638,16 @@ class NeuralVANMultilevel(torch.nn.Module):
         t0 = time.time()
         for i in range(nepochs):
             optimizer.zero_grad()
-            samples, log_prob = self(batch_size)
-            with torch.no_grad():
-                w = self.energy(samples.squeeze(), self.beta)+log_prob
-                ess, betaF = compute_metrics(w)
-            loss = torch.mean((w-w.mean()) * log_prob)
-            loss.backward()
-            optimizer.step()
+            with torch.cuda.amp.autocast():
+                samples, log_prob = self(batch_size)
+                with torch.no_grad():
+                    w = self.energy(samples.squeeze(), self.beta)+log_prob
+                    ess, betaF = compute_metrics(w)
+                loss = torch.mean((w-w.mean()) * log_prob)
+            del samples
+            scaler.scale(loss).backward()  # Added for mixed precision training
+            scaler.step(optimizer)
+            scaler.update()
             scheduler.step(w.mean())
             history['loss'].append(grab(loss))
             history['varF'].append(grab(w.mean()))
@@ -590,7 +657,6 @@ class NeuralVANMultilevel(torch.nn.Module):
             if (i+1) % print_freq == 0:
                 if on_file:
                     print_metrics(history_path, history, i+1, print_freq, t0)
-                else:
                     print(f'step: {i+1},'
                           f' loss: {grab(loss)},'
                           f' w_mean: {grab(w.mean())},'
@@ -654,12 +720,9 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
     '''
     def __init__(self, Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device):
         super().__init__(Lc, van_hyp, net_hyp, nlevels, hb_last, energy, local_energy, beta, device)
-        self.layers.module.current_level = 0
-        self.layers.module.freeze_all_layers()
 
     def eval(self,):
         self.layers.module.current_level = self.nlevels-1
-
     def train(
             self,
             nepochs,
@@ -667,16 +730,14 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             lr,
             print_freq,
             history_path,
-            w_path,
-            pretrained=True,
+            flex_kernel=True,
             on_file=True,
     ):
         history = {'loss': [], 'varF': [], 'var_varF': [], 'betaF': [], 'ESS': []}
         t0 = time.time()
         scaler = torch.cuda.amp.GradScaler() # this function will be deprecated. When this happens use function below.
         # scaler = torch.amp.GradScaler(self.device)  # Added for mixed precision training
-
-        optimizer = torch.optim.Adam(self.van.parameters(), lr=lr[0])
+        optimizer = torch.optim.Adam(self.van.parameters(), lr=lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             'min',
@@ -684,52 +745,46 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             patience=5000,
             min_lr=1e-07
         )
-
-        print("Training VAN layers...")
-        for i in range(nepochs[0]):
-            optimizer.zero_grad()
-            with torch.no_grad():
-                samples = torch.zeros([batch_size[0], 1, self.Lc, self.Lc]).to(self.device) #comment .to(device) in mps implementation
-            samples, log_prob = self.van(samples)
-            with torch.no_grad():
-                w = self.energy(samples.squeeze(), self.beta) + log_prob
-                ess, betaF = compute_metrics(w)
-            loss = torch.mean((w - w.mean()) * log_prob)
-            loss.backward()
-            optimizer.step()
-            scheduler.step(w.mean())
-            history['loss'].append(grab(loss))
-            history['varF'].append(grab(w.mean()))
-            history['var_varF'].append(grab(w.var()))
-            history['betaF'].append(grab(betaF))
-            history['ESS'].append(grab(ess))
-            if (i + 1) % print_freq == 0:
-                print(f'step: {i + 1},'
-                      f' loss: {grab(loss)},'
+        if self.nlevels==0:
+            print("Training VAN layers...")
+            for i in range(nepochs):
+                optimizer.zero_grad()
+                with torch.no_grad():
+                    samples = torch.zeros([batch_size, 1, self.Lc, self.Lc]).to(self.device) #comment .to(device) in mps implementation
+                samples, log_prob = self.van(samples)
+                with torch.no_grad():
+                    w = self.energy(samples.squeeze(), self.beta) + log_prob
+                    ess, betaF = compute_metrics(w)
+                loss = torch.mean((w - w.mean()) * log_prob)
+                loss.backward()
+                optimizer.step()
+                scheduler.step(w.mean())
+                history['loss'].append(grab(loss))
+                history['varF'].append(grab(w.mean()))
+                history['var_varF'].append(grab(w.var()))
+                history['betaF'].append(grab(betaF))
+                history['ESS'].append(grab(ess))
+                if (i + 1) % print_freq == 0:
+                    print(f'step: {i + 1},'
+                          f' loss: {grab(loss)},'
                       f' w_mean: {grab(w.mean())},'
                       f' w_var: {grab(w.var())},'
                       f' ess: {grab(ess)},'
                       f' free_en: {grab(betaF)},'
                       f' log_prob: {grab(log_prob.mean())}')
-                if on_file:
-                    print_metrics(history_path, history, i + 1, print_freq, t0)
+                    if on_file:
+                         print_metrics(history_path, history, i + 1, print_freq, t0)
+                with open(history_path, 'a') as f:
+                     f.write("Total time taken :"+str(time.time() - t0)+"\n")
+            print("Total time taken :", time.time() - t0)
+            history['time'] = time.time() - t0
 
-        ep = 0
-        tvan = t0
-        for level in range(self.nlevels):
-            print("Time taken for this level now", time.time() - tvan,)
-            with open(history_path, 'a') as f:
-                f.write("\n"+"Time taken for this level now"+str(time.time() - tvan)+"\n")
-                f.write(f"Unfreezing and training up to level {level+1}"+"\n")
-            tvan = time.time()
-            print(f"Unfreezing and training up to level {level+1}")
-            self.layers.module.unfreeze_layers(level)
-            self.layers.module.current_level = level
-            if pretrained:
-                if level > 0:
-                    self.layers.module.load_pretrained(level)  # Transfer weights from previous layers
-            ep += 1
-            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, list(self.parameters())), lr=lr[ep])
+        if self.nlevels>0:
+            if self.nlevels>1:
+                level=self.nlevels-1
+                self.layers.module.load_diff_kernel(level)  # Transfer weights from previous layers
+               # self.layers.module.verify_transfer(level)
+            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, list(self.parameters())), lr=lr)
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer,
                 'min',
@@ -737,12 +792,13 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
                 patience=5000,
                 min_lr=1e-07
             )
-            for i in range(nepochs[ep]):
-                optimizer.zero_grad()
+            print("Training Started at level_",self.nlevels)
 
+            for i in range(nepochs):
+                optimizer.zero_grad()
                 with torch.cuda.amp.autocast(): #this function will be deprecated. If this happens use function below.
                 #with torch.amp.autocast(str(self.device)):  # Added for mixed precision training
-                    samples, log_prob = self(batch_size[ep])
+                    samples, log_prob = self(batch_size)
                     with torch.no_grad():
                         w = self.energy(samples.squeeze(), self.beta) + log_prob
                         ess, betaF = compute_metrics(w)
@@ -759,8 +815,7 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
                 history['ESS'].append(grab(ess))
                 if (i + 1) % print_freq == 0:
                     if on_file:
-                        print_metrics(history_path, history, i + 1, print_freq, t0)
-
+                         print_metrics(history_path, history, i + 1, print_freq, t0)
                     print(f'step: {i + 1},'
                           f' loss: {grab(loss)},'
                           f' w_mean: {grab(w.mean())},'
@@ -768,16 +823,10 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
                           f' ess: {grab(ess)},'
                           f' free_en: {grab(betaF)},'
                           f' log_prob: {grab(log_prob.mean())}')
-
-                    if level == self.nlevels-1 and (i+1) > 2999:
-                        save(self, optimizer, w_path+'_'+str(i+1)+'.chckpnt')
-                    if level == self.nlevels-1 and (i+1) % 1000 == 0:
-                        save(self, optimizer, w_path+'_'+str(i+1)+'.chckpnt')
-        with open(history_path, 'a') as f:
-            f.write("Total time taken :"+str(time.time() - t0)+"\n")
-        print("Total time taken :", time.time() - t0)
-        history['time'] = time.time() - t0
+            with open(history_path, 'a') as f:
+                f.write("Total time taken :"+str(time.time() - t0)+"\n")
+            print("Total time taken :", time.time() - t0)
+            history['time'] = time.time() - t0
         return history
-
     def vanilla_training(self,nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path,on_file):
         return super().train(nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path)
