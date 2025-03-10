@@ -1,5 +1,5 @@
-# Multilevel Renormalization Group for Autoregressive Neural Networks
-This is the code for the paper [A Multilevel Approach for Scalable Autoregressive Neural Networks](https://openreview.net/forum?id=YcUV5apdlq).
+# Multilevel Generative Samplers for Investigating Critical Phenomena
+This is the code for the paper [Multilevel Generative Samplers for Investigating Critical Phenomena](https://openreview.net/forum?id=YcUV5apdlq).
 
 ## Installation
 You can follow the steps below to build the code from source. 
