@@ -1,8 +1,7 @@
-
 import torch
-import numpy as np
 from van_code.utils import grab
 import time
+
 
 def serial_sample_generator(model, batch_size, N_samples):
     x, logq, logp = None, None, None

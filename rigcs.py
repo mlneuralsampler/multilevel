@@ -1,8 +1,6 @@
-
 import argparse
 import random
-from van_code.RiGCS_runners import *
-
+from van_code.runners import *
 
 
 parser = argparse.ArgumentParser()
@@ -37,7 +35,7 @@ parser.add_argument("--not_hb_last", action="store_false")
 parser.add_argument("--train", action="store_true")
 parser.add_argument("--flex_kernel", action="store_true")
 parser.add_argument("--epochs", nargs="*", type=int, default=[1000,1500,1500,1500,1500,1500,1500])
-parser.add_argument("--bs", nargs="*", type=int,default=[1024,1024,1024,512,256,96,16]) #default=[1024,1024,1024,512,256,96,16])
+parser.add_argument("--bs", nargs="*", type=int,default=[1024,1024,1024,512,256,96,16])
 parser.add_argument("--lr",type=float, default=0.001 )
 parser.add_argument("--print_freq", type=int, default=100)
 parser.add_argument("--patience", type=int, default=1000)
@@ -55,17 +53,16 @@ parser.add_argument("--vanilla_epochs", type=int, default=100)
 parser.add_argument("--vanilla_bs", type=int, default=16)
 #### Sampling
 parser.add_argument("--measures", action="store_true")
-parser.add_argument("--measures_md", action="store_true") #mode dropping
-parser.add_argument("--measures_imh", action="store_true") #mode independent MH
+parser.add_argument("--measures_md", action="store_true") #measure mode dropping
+parser.add_argument("--measures_imh", action="store_true") #measure independent MH
 parser.add_argument("--bs_eval", type=int, default=1000)
 parser.add_argument("--nmeas", type=int, default=1000)
 parser.add_argument("--mc_bs", type=int, default=10000)
 parser.add_argument("--data_cluster", type=int, default=1000000)
 
 ## Paths
-parser.add_argument("--main_path", type=str, default="" )
-###Use the following to generate different directories for same model in order
-#to not overwrite files
+parser.add_argument("--main_path", type=str, default="")
+###Use the following to generate different directories for same model in order to not overwrite files
 parser.add_argument("--hyp", type=int, default=0 )
 parser.add_argument("--fix_seed", action="store_true")
 parser.add_argument("--seed", type=int, default=137)

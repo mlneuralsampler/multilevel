@@ -6,7 +6,6 @@ from van_code.utils import compute_metrics, grab, print_metrics
 import time
 
 
-
 class ResBlock(nn.Module):
     def __init__(self, block):
         super(ResBlock, self).__init__()
@@ -95,8 +94,6 @@ class PixelCNN(nn.Module):
                 padding=self.half_kernel_size,
                 bias=self.bias,
                 exclusive=True)
-        #torch.nn.init.ones_(self.energy_layer.weight.data)
-        #self.energy_layer.bias.data.zero_()
 
     def _build_simple_block(self, in_channels, out_channels):
         layers = []
@@ -144,11 +141,6 @@ class PixelCNN(nn.Module):
 
         return x_hat
 
-    # sample = +/-1, +1 = up = white, -1 = down = black
-    # sample.dtype == default_dtype_torch
-    # x_hat = p(x_{i, j} == +1 | x_{0, 0}, ..., x_{i, j - 1})
-    # 0 < x_hat < 1
-    # x_hat will not be flipped by z2
     def sample(self, batch_size):
         sample = torch.zeros(
             [batch_size, 1, self.L, self.L],
@@ -197,9 +189,8 @@ class PixelCNN(nn.Module):
         return samples, log_prob
 
 
-
-def train_van(net,energy,beta,nepochs,batch_size,optimizer,print_freq,history_file):
-    history={'rein_loss':[],'varF':[],'betaF':[],'ESS':[]}
+def train_van(net, energy, beta, nepochs, batch_size, optimizer, print_freq, history_file):
+    history={'rein_loss': [], 'varF': [], 'betaF': [], 'ESS': []}
     t0=time.time()
     for epoch in range(nepochs):
         optimizer.zero_grad()
@@ -226,12 +217,8 @@ def train_van(net,energy,beta,nepochs,batch_size,optimizer,print_freq,history_fi
     return history
 
 
-def sample_van(net,energy,beta,batch_size,nbatch):
-    W=[]
-    conf=[]
-    m=[]
-    En=[]
-    t0=time.time()
+def sample_van(net, energy, beta, batch_size, nbatch):
+    W, m, En, t0 = [], [], [], time.time()
     with torch.no_grad():
         for i in range(nbatch):
             sample, _ =net.sample(batch_size)
@@ -261,7 +248,6 @@ def sample_forward(net,energy,beta,config,nbatch,device):
             W.append(grab(w))
     t1=time.time()
     return np.asarray(W).reshape(-1),t1-t0
-
 
 
 def serial_sample_generator(model, batch_size, N_samples):

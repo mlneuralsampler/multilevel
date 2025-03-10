@@ -1,13 +1,10 @@
-
 import torch
 import torch.nn as nn
 import numpy as np
 from numpy import log
 from van_code.utils import compute_metrics, grab, print_metrics, make_checker_mask, save
 import time
-import os
 import sys
-import gc
 sys.stdout.flush()
 
 
@@ -40,8 +37,6 @@ def make_conv_net(
             conv = torch.nn.Conv2d(sizes[i], sizes[i+1], kernel_size[i], padding=padding_size[i], stride=stride, padding_mode='circular', bias=use_bias)
         else:
             conv = torch.nn.Conv2d(sizes[i], sizes[i+1], kernel_size[i], padding=padding_size[i], stride=1, padding_mode='circular', bias=use_bias)
-        #torch.nn.init.xavier_normal_(conv.weight, gain=torch.nn.init.calculate_gain('tanh'))
-        #torch.nn.init.normal_(conv.weight, std=0.01)
         net.append(conv)
         if i != len(sizes) - 2:
             if (use_tanh):
@@ -49,13 +44,9 @@ def make_conv_net(
             else:
                 net.append(torch.nn.LeakyReLU(0.1))
 
-    #net[-1].weight.data.zero_()
-    #if use_bias:
-        #torch.nn.init.constant_(net[-1].bias.data, 0.0)
     if sig_last:
         net.append(torch.nn.Sigmoid())
     return torch.nn.Sequential(*net)
-
 
 ###PixelCNN
 class ResBlock(nn.Module):
@@ -139,9 +130,6 @@ class PixelCNN(nn.Module):
         layers.append(nn.Sigmoid())
         self.net = nn.Sequential(*layers)#.to(self.device)
 
-        #torch.nn.init.ones_(self.energy_layer.weight.data)
-        #self.energy_layer.bias.data.zero_()
-
     def _build_simple_block(self, in_channels, out_channels):
         layers = []
         layers.append(nn.PReLU(in_channels, init=0.5))
@@ -194,15 +182,7 @@ class PixelCNN(nn.Module):
 
         return x_hat
 
-    # sample = +/-1, +1 = up = white, -1 = down = black
-    # sample.dtype == default_dtype_torch
-    # x_hat = p(x_{i, j} == +1 | x_{0, 0}, ..., x_{i, j - 1})
-    # 0 < x_hat < 1
-    # x_hat will not be flipped by z2
     def sample(self, sample):
-        #sample = torch.zeros(
-         #   [batch_size, 1, self.L, self.L],)
-            #device=next(self.net.parameters()).device)
         for i in range(self.L):
             for j in range(self.L):
                 x_hat = self.forward_net(sample)
@@ -251,8 +231,6 @@ class VAN_CNN(torch.nn.Module):
         self.device=kwargs['device']
         self.mixture_components=6
         self.net=make_conv_net(hidden_sizes=self.hidden_size, kernel_size=self.kernel_size)#.to(self.device)
-        ### level=0 -> intermediate level
-        ### level=1 -> fine level
         if kwargs['level'] == 0:
             self._cond=self._cond_inter
         elif kwargs['level'] == 1:
@@ -273,7 +251,6 @@ class VAN_CNN(torch.nn.Module):
                     with torch.no_grad():
                         x[:,:,i,j]=torch.bernoulli(x_hat[:,:,i,j])*2-1
                     logq+=(torch.log(x_hat[:,:,i,j]+self.epsilon)*((x[:,:,i,j]+1)/2)+torch.log(1-x_hat[:,:,i,j]+self.epsilon)*(1-((x[:,:,i,j]+1)/2))).squeeze()
-                    #print('vacnn forward',i,j,logq.mean(),x[0,:,i,j],x_hat[0,:,i,j])
         return x,logq
 
     def reverse(self,x):
@@ -296,7 +273,7 @@ class HB_level(torch.nn.Module):
         self.beta=kwargs['beta']
         self.local_energy=kwargs['local_energy']
         self.device=kwargs['device']
-        self.mask=make_checker_mask((self.Lf,self.Lf),0)#.to(self.device)
+        self.mask=make_checker_mask((self.Lf,self.Lf),0) #.to(self.device)
         if kwargs['level']==0:
             self.forward=self.forward_course
         elif kwargs['level']==1:
@@ -311,11 +288,8 @@ class HB_level(torch.nn.Module):
         with torch.no_grad():
             acc = x_hat > torch.rand(x.shape).to(x.device)
             x_new=torch.where(acc,1.0,-1.0)
-            #print(x_new[0,1::2,1::2])
             x[:,1::2,1::2]=x_new[:,1::2,1::2]
-        #print(x[0])
         log_prob=torch.log(1/(1+torch.exp(-2*self.beta*self.local_energy(x)*x)))[:,1::2,1::2]
-        #print(log_prob[0])
         log_prob=log_prob.reshape(log_prob.shape[0],-1).sum(dim=1)
         return x.unsqueeze(1),log_prob
 
@@ -374,7 +348,6 @@ class EmbeddingC_F(torch.nn.Module):
 
     def reverse(self, sample_f):
         with torch.no_grad():
-            #sample=torch.zeros((sample_f.shape[0],self.channels,self.Lf//2,self.Lf//2),device=sample_f.device)
             sample = sample_f[:, :, ::2, ::2]
         return sample, 0
 
@@ -388,7 +361,6 @@ class MultilevelBlock(torch.nn.Module):
     def forward(self, sample):
         sample, _ = self.embedding(sample)
         sample, dlogq = self.van_upsampling(sample)
-        #print('inside block, gpu:',sample.device)
         return sample, dlogq
 
     def reverse(self, sample):
@@ -411,8 +383,6 @@ class Multilevel(torch.nn.Module):
         layers = []
         j = 0
         print("k_size",net_hyp['kernel_size'])
-       # net_hyp['kernel_size'] = [net_hyp['kernel_size'][i:i + 2] for i in range(0, len(net_hyp['kernel_size']), 2)]
-       # net_hyp['hidden_size']=net_hyp['hidden_size'].reshape(-1,2)
         for i in range(self.nlevels-1):
             self.Lf *= 2
             embedding = EmbeddingC_F(self.Lf, int(self.in_channels), device)
@@ -477,7 +447,6 @@ class Multilevel(torch.nn.Module):
 
         self.layers = torch.nn.ModuleList(layers)
 
-
     def forward(self, sample, log_prob):
         for i in range(self.current_level + 1):  # Use only the unfreezed layers
             sample, dlog = self.layers[i](sample)
@@ -489,6 +458,7 @@ class Multilevel(torch.nn.Module):
             sample, dlog = self.layers[i].reverse(sample)
             log_prob = log_prob + dlog
         return sample, log_prob
+
     def load_pretrained(self, level):
         if (level+1) == self.nlevels:
             prev_layer = self.layers[level-1].van_upsampling.net_i
@@ -496,6 +466,7 @@ class Multilevel(torch.nn.Module):
         else:
             prev_layer = self.layers[level-1]
             self.layers[level].load_state_dict(prev_layer.state_dict())
+
     def transfer_weights_adaptive(self,source_layer, target_layer,k1,k2):
         # Get kernel sizes
         K_init = k1
@@ -521,6 +492,7 @@ class Multilevel(torch.nn.Module):
          # Transfer the bias directly if it exists
         if source_layer.bias is not None and target_layer.bias is not None:
              target_layer.bias.data = source_layer.bias.data.clone()
+
     def load_diff_kernel(self,level):
         if self.nlevels ==2:
              net1_i = self.layers[level-1].van_upsampling.net_i.net
@@ -561,6 +533,7 @@ class Multilevel(torch.nn.Module):
              for layer1, layer2,c,d in zip(conv_layers_1, conv_layers_2,k1_f,k2_f):
                   if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
                       self.transfer_weights_adaptive(layer1, layer2,c,d)
+
 
 class NeuralVANMultilevel(torch.nn.Module):
     '''
@@ -830,5 +803,6 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             print("Total time taken :", time.time() - t0)
             history['time'] = time.time() - t0
         return history
-    def vanilla_training(self,nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path,on_file):
+
+    def vanilla_training(self,nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path):
         return super().train(nepochs,batch_size,optimizer,scheduler,print_freq,history_path,weights_path)

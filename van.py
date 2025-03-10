@@ -1,11 +1,9 @@
-import torch
-import numpy as np
 import argparse
 import random
 import pickle
 from van_code.van import PixelCNN, train_van, sample_van, sample_forward,make_mcmc_ensemble
 from van_code.utils import *
-from van_code.ising import ising_energy, analytical_solution
+from van_code.ising import ising_energy
 
 parser = argparse.ArgumentParser()
 #### Theory
@@ -139,6 +137,7 @@ def measures(args):
     _=gamma_analysis_OBS(E,w,measures_path) #Internal Energy
     _=gamma_analysis_OBS(np.abs(m),w,measures_path) #Absolute |m|
 
+
 def measures_modedrop(args):
     model, path, info = init(args)
     bs=args.bs_eval
@@ -187,7 +186,6 @@ def measures_NMCMC(args):
     with torch.no_grad():
         ensemble=make_mcmc_ensemble(model, bs,args.data_cluster,model.device)
     cluster_analysis(np.asarray(ensemble['x']).reshape((-1,model.L,model.L) ),ising_energy,args.beta,measures_path)
-
 
 
 def main(args):

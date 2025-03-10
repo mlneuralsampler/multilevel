@@ -26,18 +26,18 @@ The file `main.py` can be used to train new  models and run the analysis once th
 A detailed list of non-defualt hyperparameters used for the experiments is reported in the [paper](todo=-link).
 For training the model it is sufficient to run
 ```bash
-$ python3 main.py --train 
+$ python3 rigcs.py --train 
 ```
 Once the model has been trained, the analysis can be run right away with the commands below. 
 Note that the path to the model is automatically built from the parser based on the same arguments used for training.
 Therefore, it is important to not change the arguments default `args` or those supplied by command line for training 
 the model. To compute the metrics associated with **importance sampling** one can run
 ```bash
-$ python3 main.py --measures_md 
+$ python3 rigcs.py --measures_md 
 ```
 to perform unbiased sampling via *neural-mcmc* as discussed in [Nicoli et al., Phys. Rev. E (2019)](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.101.023304)
 ```bash
-$ python3 main.py --measures_imh
+$ python3 rigcs.py --measures_imh
 ```
 
 ## Baselines
