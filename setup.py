@@ -14,7 +14,8 @@ setup(
         'scipy',
         'autograd',
         'numdifftools',
-        'pandas'
+        'pandas',
+        'unzip'
     ],
     setup_requires=[
         'setuptools_scm',
