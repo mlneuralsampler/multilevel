@@ -382,7 +382,7 @@ class Multilevel(torch.nn.Module):
     def _init_blocks(self, net_hyp, hb_last, local_energy, beta, device):
         layers = []
         j = 0
-        print("k_size",net_hyp['kernel_size'])
+        #print("k_size",net_hyp['kernel_size'])
         for i in range(self.nlevels-1):
             self.Lf *= 2
             embedding = EmbeddingC_F(self.Lf, int(self.in_channels), device)
@@ -394,7 +394,7 @@ class Multilevel(torch.nn.Module):
                 level=0,
                 device=device
             )
-            print('nnot gd',j,net_hyp['kernel_size'][j])
+            #print('nnot gd',j,net_hyp['kernel_size'][j])
             j += 1
             net_f = VAN_CNN(
                 hidden_size=net_hyp['hidden_size'][j],
@@ -404,13 +404,13 @@ class Multilevel(torch.nn.Module):
                 level=1,
                 device=device
             )
-            print(j,net_hyp['kernel_size'][j])
+            #print(j,net_hyp['kernel_size'][j])
             j += 1
             van_cnn = VANUpsampling(net_i, net_f)
             layers.append(MultilevelBlock(embedding, van_cnn))
 
         self.Lf *= 2
-        print('Lf=',self.Lf)
+        #print('Lf=',self.Lf)
         embedding = EmbeddingC_F(self.Lf, int(self.in_channels), device)
         net_i = VAN_CNN(
             hidden_size=net_hyp['hidden_size'][j],
@@ -420,7 +420,7 @@ class Multilevel(torch.nn.Module):
             level=0,
             device=device
         )
-        print(j, net_hyp['kernel_size'][j])
+        #print(j, net_hyp['kernel_size'][j])
 
         if hb_last:
             net_f = HB_level(
@@ -504,7 +504,7 @@ class Multilevel(torch.nn.Module):
 
 
              for layer1, layer2,e1,f1 in zip(conv_layers_1, conv_layers_2,e,f):
-                  print(e1,f1)
+                  #print(e1,f1)
                   if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
                        self.transfer_weights_adaptive(layer1, layer2,e1,f1)
         else:
@@ -517,7 +517,7 @@ class Multilevel(torch.nn.Module):
 
 
              for layer1, layer2,e1,f1 in zip(conv_layers_1, conv_layers_2,e,f):
-                  print(e1,f1)
+                  #print(e1,f1)
                   if isinstance(layer1, nn.Conv2d) and isinstance(layer2, nn.Conv2d):
                        self.transfer_weights_adaptive(layer1, layer2,e1,f1)
 
@@ -550,8 +550,8 @@ class NeuralVANMultilevel(torch.nn.Module):
         self.nlevels = nlevels #Number of intermediate/fine layers
         device_counts = [torch.cuda.device(i) for i in range(torch.cuda.device_count())]
         device_ids = [i for i in range(len(device_counts))]
-        if len(device_ids) > 0:
-            print(device_ids)
+        #if len(device_ids) > 0:
+            #print(device_ids)
 
         self.in_channels=1
 
@@ -706,8 +706,8 @@ class NeuralVANMultilevel_block_wise(NeuralVANMultilevel):
             flex_kernel=True,
             on_file=True,
     ):
-        self.layers.module.current_level = 0
-        self.layers.module.freeze_all_layers()
+        #self.layers.module.current_level = 0
+        #self.layers.module.freeze_all_layers()
         history = {'loss': [], 'varF': [], 'var_varF': [], 'betaF': [], 'ESS': []}
         t0 = time.time()
         scaler = torch.cuda.amp.GradScaler() # this function will be deprecated. When this happens use function below.
