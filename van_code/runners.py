@@ -1,12 +1,11 @@
-import torch
-import numpy as np
 import pickle
-from van_code.nn_RiGCS import NeuralVANMultilevel,NeuralVANMultilevel_block_wise
+from van_code.nn import NeuralVANMultilevel_block_wise
 from van_code.utils import *
-from van_code.ising import phi4_energy, local_ising_energy, ising_energy, analytical_solution
+from van_code.ising import local_ising_energy, ising_energy
 from van_code.montecarlo import *
 import sys
 import glob
+
 def init(args):
     device=get_device()
     info='Device '+str(device)
@@ -84,7 +83,9 @@ def training(args):
              model.load_state_dict(saved_state_dict, strict=False)  # Load matching layers only
         history=model.train(nepochs,bs,lr,print_freq,history_file_training,True,True)
     else:
-        history=model.vanilla_training(args.vanilla_epochs,args.vanilla_bs,optimizer,scheduler,print_freq,history_file_training,weights_path,True)
+        history=model.vanilla_training(
+            args.vanilla_epochs,args.vanilla_bs,optimizer,scheduler,print_freq,history_file_training,save_weight,True
+        )
 
     with open(history_dict, 'wb') as f:
         pickle.dump(history, f)
@@ -113,8 +114,6 @@ def measures(args):
         f.write(str(t)+'\n')
 
     gamma_analysis(w,measures_path)
-   # _=gamma_analysis_OBS(E,w,measures_path) #Internal Energy
-   # _=gamma_analysis_OBS(np.abs(m),w,measures_path) #Absolute |m|
 
 # Load the data from the file and prepare for batching
 def load_dat_in_batches(file_path, batch_sz,L):
@@ -126,8 +125,6 @@ def load_dat_in_batches(file_path, batch_sz,L):
            # batch.append(data)
             if len(data) == L**2:
                 batch.append(data)
-            #else:
-             #   print(f"Skipping malformed line in {file_path}: {line.strip()}")
 
             if len(batch) == batch_sz:
                 # Convert to PyTorch tensor and move to GPU
@@ -167,43 +164,7 @@ def process_multiple_dat_files(model,dat_files, batch_sz, L,bs,beta,nmeas):
     print("W shape",len(W))
    # print("After 2nd",t)
     return np.array(Wf).flatten(),np.array(W).flatten(),np.array(M).flatten(),np.array(E).flatten(),np.array(M_clus).flatten(), np.array(E_clus).flatten(),t
- # Perform inference on the batch
-def measures_modedrop_old(args):
-    model, path, info = init(args)
-    bs=args.bs_eval
-    nmeas=args.nmeas
-    print("Lf:", model.Lf)
-    info+='\nbatch size '+str(bs)+' nmeas '+str(nmeas)+'\n'
-    measures_path=main_path+'results/'+path+'_measures_modedrop.log'
-    clstr_path=main_path+'results/'+path+'_measuresCluster.log'
-    print("Model Weight path:" ,weights_path)
-   # path_ising=main_path+'config/Ising_data_nx{}_beta0.4400000000_data{}.dat'.format(model.Lf,args.data_cluster) #Fixed beta
-    optimizer=torch.optim.Adam(model.parameters(), lr=args.lr)
-    load(model,optimizer,weights_path)
-    model.eval()
-    data_path = main_path+'config/{}'.format(model.Lf)  # Update this to your directory
 
-     # Use glob to find all .dat files in the directory
-    data_files = glob.glob(f'{data_path}/*.dat')
-    Wf,W, M,E,M_clus, E_clus, t=process_multiple_dat_files(model,data_files, args.batch_sz,model.Lf,bs,args.beta,nmeas)
-    #Cluster
-    #data=np.genfromtxt(path_ising).reshape(-1,model.Lf,model.Lf)
-    #cluster_analysis(data,ising_energy,args.beta,clstr_path)
-    print(np.array(Wf).shape, type(W), type(M), np.array(E).shape, np.array(M_clus).shape, np.array(E_clus).shape)
-    sys.stdout.flush()
-
-    with open(measures_path, 'a') as f:
-        f.write(info)
-
-    cluster_obs(E_clus,clstr_path)
-    cluster_obs(np.abs(M_clus),clstr_path)
-
-    with open(measures_path, 'a') as f:
-        f.write(str(t)+'\n')
-
-    gamma_analysis_modedrop(W,Wf,measures_path)
-    _=gamma_analysis_OBS(E,W,measures_path) #Internal Energy
-    _=gamma_analysis_OBS(np.abs(M),W,measures_path) #Absolute |m|
 
 def measures_modedrop(args):
     model, path, info = init(args)
@@ -240,7 +201,6 @@ def measures_modedrop(args):
     gamma_analysis_modedrop(W,Wf,measures_path)
     _=gamma_analysis_OBS(E,W,measures_path) #Internal Energy
     _=gamma_analysis_OBS(np.abs(M),W,measures_path) #Absolute |m|
-
 
 
 def measures_IMH(args):
