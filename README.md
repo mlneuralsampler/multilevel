@@ -61,8 +61,7 @@ As far as the **cluster** methods we refer to the source code linked to the pape
 This repository contains a folder `examples` with two `ipython` notebooks which can be used to gain familiarity with the code and the model's structure.
 
 - `multilevel.ipynb`: this notebook is intended to help the user understanding the protocol of our training. Namely, using this notebook the user can understand how the models are built and how it is stored fur future evaluation. All the functionalities shown therein are used in the `main.py` for training new models. 
-- `plot.ipynb`: this notebook gives an overview of the different metrics which can be computed using a trained model. The notebook can be directly exectued by the user. The pre-trained models have been stored in `data/model` while the ground truth simulations using cluster method for large number of samples are stored in `data/config`. 
-**N.B.** Note to the user: in case you want to access the configurations in `data/config` those files need to be unzipped first. Configurations contained therein are for demonstration purposes and because they are quite heavy we only included them up to lattices of size `16x16`.
+**N.B.** Note to the user: in case you want to access the configurations in `data/config` those files need to be unzipped first. A util script unzip.py can be found in `/examples/.`. Configurations contained in `data/config` are for demonstration purposes and because they are quite heavy we only included them up to lattices of size `16x16`.
 
 In order install your python environment for running the examples notebook you can run the following command (first make sure your virtual environment is active, otherwise first run `$ source .venv/bin/activate`)
 ```bash 
